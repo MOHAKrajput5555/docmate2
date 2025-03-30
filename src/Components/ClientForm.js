@@ -1,62 +1,64 @@
-// src/components/ClientForm.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import '../styles/ClientForm.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import "../styles/ClientForm.css";
+import CreateFolderForm from "./createFolder";
+import UploadFileForm from "./CreateFileName";
 
 const ClientForm = () => {
-  const { id } = useParams();
+  const [id ,setId]=useState('')
+  
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    company: '',
-    name: '',
-    gst: '',
-    address: '',
-    profileLink: '',
+    CompanyName: "",
+    clientName: "",
+    companyGst: "",
+    CompanyADD: "",
+ 
   });
 
-  // Simulate fetching client data for editing
-  useEffect(() => {
-    if (id) {
-      const client = {
-        company: 'Acme Corp',
-        name: 'John Smith',
-        gst: '123456789',
-        address: '123 Main St, Anytown',
-        profileLink: '',
-      };
-      setFormData(client);
-    }
-  }, [id]);
+  // Fetch existing client data if editing
+  console.log(id)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate saving the client
-    console.log('Form submitted:', formData);
-    navigate('/');
+    try {
+   
+       const res= await axios.post("https://server.thedocumate.in/api/v1/client/create-client", formData);
+       setId(res.data.data.data._id) 
+       console.log(res)
+       if(res){
+        alert("Client Created")
+       }
+
+      
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
     <div className="client-form">
-      <h2>{id ? 'Edit Client' : 'Create Client Form'}</h2>
+      <h2>{id ? "Edit Client" : "Create Client Form"}</h2>
       <form onSubmit={handleSubmit}>
         <label>Name of the company</label>
         <input
           type="text"
-          name="company"
+          name="CompanyName"
           placeholder="Enter company name"
-          value={formData.company}
+          value={formData.CompanyName}
           onChange={handleChange}
         />
         <label>Client Name</label>
         <input
           type="text"
-          name="name"
+          name="clientName"
           placeholder="Enter client name"
-          value={formData.name}
+          value={formData.clientName}
           onChange={handleChange}
         />
         <div className="form-row">
@@ -64,9 +66,9 @@ const ClientForm = () => {
             <label>GST No.</label>
             <input
               type="text"
-              name="gst"
+              name="companyGst"
               placeholder="Enter GST number"
-              value={formData.gst}
+              value={formData.companyGst}
               onChange={handleChange}
             />
           </div>
@@ -74,34 +76,25 @@ const ClientForm = () => {
             <label>Address</label>
             <input
               type="text"
-              name="address"
+              name="CompanyADD"
               placeholder="Enter address"
-              value={formData.address}
+              value={formData.CompanyADD}
               onChange={handleChange}
             />
           </div>
         </div>
-        <label>Profile Link</label>
-        <input
-          type="text"
-          name="profileLink"
-          placeholder="Enter profile link"
-          value={formData.profileLink}
-          onChange={handleChange}
-        />
-        <button type="button" className="upload-button">
-          Upload File
-        </button>
+   
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/')} className="cancel-button">
+          <button type="button" onClick={() => navigate("/")} className="cancel-button">
             Cancel
           </button>
           <button type="submit" className="save-button">
-            Save
+            {id ? "Update" : "Save"}
           </button>
         </div>
       </form>
-      <div className="notification">Great! Keep going, done!</div>
+      
+ 
     </div>
   );
 };

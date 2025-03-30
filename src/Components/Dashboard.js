@@ -1,39 +1,35 @@
 // src/components/Dashboard.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientCard from './ClientCard';
+import { AuthContext } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 
-const initialClients = [
-  {
-    id: 1,
-    company: 'Acme Corp',
-    name: 'John Smith',
-    gst: '123456789',
-    address: '123 Main St, Anytown',
-  },
-  {
-    id: 2,
-    company: 'Beta LLC',
-    name: 'Jane Doe',
-    gst: '987654321',
-    address: '456 Elm St, Othertown',
-  },
-  {
-    id: 3,
-    company: 'Gamma Inc',
-    name: 'Alice Johnson',
-    gst: '112233445',
-    address: '789 Oak St, Anothertown',
-  },
-];
+// Mock client data (isolated per admin)
+const initialClients = {
+  1: [
+    { id: 1, company: 'Acme Corp', name: 'John Smith', gst: '123456789', address: '123 Main St, Anytown', profileLink: 'https://example.com/acme-corp' },
+  ],
+  2: [
+    { id: 2, company: 'Beta LLC', name: 'Jane Doe', gst: '987654321', address: '456 Elm St, Othertown', profileLink: 'https://example.com/beta-llc' },
+  ],
+  3: [
+    { id: 3, company: 'Gamma Inc', name: 'Alice Johnson', gst: '112233445', address: '789 Oak St, Anothertown', profileLink: 'https://example.com/gamma-inc' },
+  ],
+};
 
 const Dashboard = () => {
-  const [clients, setClients] = useState(initialClients);
+  const { currentAdmin, logout } = useContext(AuthContext);
+  const [clients, setClients] = useState(initialClients[currentAdmin?.id] || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const clientsPerPage = 3;
   const navigate = useNavigate();
+
+  if (!currentAdmin) {
+    navigate('/login');
+    return null;
+  }
 
   // Search functionality
   const filteredClients = clients.filter(
@@ -65,7 +61,25 @@ const Dashboard = () => {
         <button className="nav-button create" onClick={() => navigate('/create')}>
           Create
         </button>
+        {currentAdmin.role === 'Super Admin' && (
+          <button className="nav-button" onClick={() => navigate('/admin-management')}>
+            Admin Management
+          </button>
+        )}
+        <button className="nav-button logout" onClick={logout}>
+          Logout
+        </button>
       </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <button
+          className="nav-button"
+          onClick={() => navigate('/client-profile/1')}
+        >
+          View My Profile (Client)
+        </button>
+      </div>
+
       <div className="search-bar">
         <input
           type="text"
@@ -75,11 +89,11 @@ const Dashboard = () => {
         />
         <button className="search-button">Search</button>
       </div>
-      <h2>Client List</h2>
+      <h2>Client List (Admin: {currentAdmin.name})</h2>
       <div className="client-list">
-        {currentClients.map((client) => (
-          <ClientCard key={client.id} client={client} />
-        ))}
+
+          <ClientCard  />
+   
       </div>
       <div className="pagination">
         <button onClick={handlePrevious} disabled={currentPage === 1}>
