@@ -11,6 +11,11 @@ const UploadPhotoForm = () => {
   const [error, setError] = useState(null);
 
   const handleFileChange = (e) => {
+
+
+
+
+    
     setPhoto(e.target.files[0]); // Store selected file
   };
 
